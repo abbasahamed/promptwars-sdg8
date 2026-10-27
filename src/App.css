@@ -363,7 +363,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .adoption-columns-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
-  .app-header { padding: 12px 16px; }
+  .app-header { position: relative; padding: 12px 16px; }
   .brand-group { align-items: flex-start; flex-direction: column; gap: 10px; }
   .header-primary-controls, .header-controls, .role-switch-container, .industry-switch-container { width: 100%; }
   .header-primary-controls { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -373,7 +373,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .role-switch-container, .industry-switch-container { align-items: flex-start; flex-direction: column; }
   .segmented-control { max-width: 100%; overflow-x: auto; }
   .segmented-btn { flex: 1; min-width: max-content; }
-  .worker-tab-bar { top: 12px; width: 100%; }
+  .worker-tab-bar { position: static; top: auto; width: 100%; }
   .tab-btn { flex: 1; }
   .form-group-grid { grid-template-columns: 1fr; }
   .preset-picker-card { width: 100%; }
