@@ -1,82 +1,142 @@
 import { useState, useEffect } from 'react'
+import type { Role, Industry, Language } from './types'
+import { translations } from './i18n/translations'
+import { initializeStorage, resetToDefaultSeed } from './services/storageService'
+import { Navbar } from './components/Navbar'
+import { TransparentPay } from './components/TransparentPay'
+import { SafeVoiceReport } from './components/SafeVoiceReport'
+import { EmployerDashboard } from './components/EmployerDashboard'
+import { IndustryAdoptionModal } from './components/IndustryAdoptionModal'
 import './App.css'
 
 export default function App() {
-  const [currentTime, setCurrentTime] = useState<string>(() =>
-    new Date().toLocaleTimeString()
-  )
+  const [role, setRole] = useState<Role>('worker')
+  const [industry, setIndustry] = useState<Industry>('construction')
+  const [language, setLanguage] = useState<Language>('en')
+  const [workerTab, setWorkerTab] = useState<'pay' | 'safevoice'>('pay')
+  const [showAdoptionGuide, setShowAdoptionGuide] = useState<boolean>(false)
+  const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false)
+  const [storageVersion, setStorageVersion] = useState<number>(1)
 
+  // Initialize demo data on load
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString())
-    }, 1000)
-    return () => clearInterval(timer)
+    initializeStorage()
   }, [])
 
+  const t = translations[language]
+
+  const handleResetData = () => {
+    resetToDefaultSeed()
+    setStorageVersion((v) => v + 1)
+    setShowResetConfirm(false)
+  }
+
   return (
-    <div className="container">
-      <header className="header">
-        <div className="badge">PromptWars × ACM SRM Student Chapter</div>
-        <h1 className="title">SDG 8 Hackathon Workspace</h1>
-        <p className="subtitle">
-          United Nations Sustainable Development Goal 8: Decent Work & Economic Growth
-        </p>
-      </header>
+    <div className="app-root">
+      <Navbar
+        role={role}
+        setRole={setRole}
+        industry={industry}
+        setIndustry={setIndustry}
+        language={language}
+        setLanguage={setLanguage}
+        onResetData={() => setShowResetConfirm(true)}
+        onOpenAdoptionGuide={() => setShowAdoptionGuide(true)}
+      />
 
-      <main className="main-card">
-        <div className="status-banner">
-          <span className="status-dot"></span>
-          <div>
-            <strong>Status:</strong> Official Problem Statement Pending
+      <main className="main-content" key={`${industry}-${storageVersion}`}>
+        {/* Worker Interface */}
+        {role === 'worker' && (
+          <div className="worker-view-container">
+            {/* Worker Sub-navigation */}
+            <div className="worker-tab-bar">
+              <button
+                type="button"
+                className={`tab-btn ${workerTab === 'pay' ? 'active' : ''}`}
+                onClick={() => setWorkerTab('pay')}
+              >
+                💰 {t.navPay}
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${workerTab === 'safevoice' ? 'active' : ''}`}
+                onClick={() => setWorkerTab('safevoice')}
+              >
+                🛡️ {t.navSafeVoice}
+              </button>
+            </div>
+
+            {workerTab === 'pay' ? (
+              <TransparentPay industry={industry} language={language} />
+            ) : (
+              <SafeVoiceReport industry={industry} language={language} />
+            )}
           </div>
-        </div>
+        )}
 
-        <p className="status-description">
-          The exact problem statement and challenge specifications will be revealed at the
-          hackathon kickoff. No challenge solution or speculative domain logic has been
-          pre-built.
-        </p>
-
-        <div className="grid">
-          <div className="card">
-            <h3>Hackathon Setup</h3>
-            <p className="card-value">Ready for ~3h Sprint</p>
-            <p className="card-detail">Minimal, lightweight React + TS + Vite starter</p>
+        {/* Employer / Admin Interface */}
+        {role === 'employer' && (
+          <div className="employer-view-container">
+            <EmployerDashboard industry={industry} language={language} />
           </div>
-
-          <div className="card">
-            <h3>Environment</h3>
-            <p className="card-value">MacBook Air M4</p>
-            <p className="card-detail">Node.js, npm, Vite HMR, and TypeScript verified</p>
-          </div>
-
-          <div className="card">
-            <h3>Target Theme</h3>
-            <p className="card-value">UN SDG 8</p>
-            <p className="card-detail">Decent work, inclusive economic growth, and employment</p>
-          </div>
-
-          <div className="card">
-            <h3>Local Clock</h3>
-            <p className="card-value mono">{currentTime}</p>
-            <p className="card-detail">React state & runtime active</p>
-          </div>
-        </div>
-
-        <div className="checklist">
-          <h3>Pre-Flight Checklist</h3>
-          <ul>
-            <li>✅ Repository initialized under 10 MB limit</li>
-            <li>✅ Production build (`npm run build`) passing</li>
-            <li>✅ TypeScript strict type-checking (`npm run typecheck`) passing</li>
-            <li>✅ Linter (`npm run lint`) passing</li>
-            <li>⏳ Awaiting official prompt announcement</li>
-          </ul>
-        </div>
+        )}
       </main>
 
-      <footer className="footer">
-        <p>Prepared for PromptWars × ACM SRM Student Chapter</p>
+      {/* Cross-Industry Blueprint Modal */}
+      {showAdoptionGuide && (
+        <IndustryAdoptionModal
+          language={language}
+          onClose={() => setShowAdoptionGuide(false)}
+        />
+      )}
+
+      {/* Reset Demo Data Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card modal-sm">
+            <div className="modal-header">
+              <h3 className="modal-title">⚠️ Reset Demo Data</h3>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="text-secondary">{t.resetConfirm}</p>
+              <div className="modal-actions-row mt-4">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => setShowResetConfirm(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="primary-btn btn-danger"
+                  onClick={handleResetData}
+                >
+                  Yes, Reset Everything
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Accessible Footer */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <div className="footer-left">
+            <strong>FairShift</strong> — Built for PromptWars × ACM SRM Student Chapter (2026)
+          </div>
+          <div className="footer-right">
+            <span>UN Sustainable Development Goal 8 • Decent Work & Economic Growth</span>
+          </div>
+        </div>
       </footer>
     </div>
   )
