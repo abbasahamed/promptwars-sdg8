@@ -17,6 +17,8 @@ dist-ssr/
 .DS_Store
 Thumbs.db
 
+/SKILLS/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
