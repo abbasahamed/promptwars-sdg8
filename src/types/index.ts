@@ -72,6 +72,7 @@ export interface GrievanceReport {
   title: string
   description: string
   isAnonymous: boolean
+  reporterId?: string
   reporterName?: string
   reporterRole?: string
   createdAt: string

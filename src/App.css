@@ -119,11 +119,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sdg-pill, .trust-note, .context-line { display: inline-flex; align-items: center; gap: var(--s-2); color: var(--text-2); font-size: .8125rem; }
 .sdg-pill { padding: 6px 10px; border: 1px solid var(--separator); border-radius: 999px; }
 .sdg-number { display: inline-grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; color: var(--on-accent); background: var(--accent); font-size: .75rem; font-weight: 700; }
-.control-capsule, .segmented-control, .worker-tab-bar { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--separator); background: color-mix(in srgb, var(--surface) 65%, transparent); border-radius: 999px; }
-.capsule-label { display: grid; min-width: 32px; min-height: 36px; place-items: center; color: var(--text-2); }
-.pill-btn, .segmented-btn, .tab-btn { min-height: 36px; border: 0; border-radius: 999px; color: var(--text-2); background: transparent; font-size: .875rem; font-weight: 600; }
-.pill-btn { padding: 0 10px; }
-.pill-btn.active, .segmented-btn.selected, .tab-btn.active { color: var(--accent); background: var(--accent-soft); }
+.segmented-control, .worker-tab-bar { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--separator); background: color-mix(in srgb, var(--surface) 65%, transparent); border-radius: 999px; }
+.segmented-btn, .tab-btn { min-height: 36px; border: 0; border-radius: 999px; color: var(--text-2); background: transparent; font-size: .875rem; font-weight: 600; }
+.segmented-btn[aria-pressed="true"], .tab-btn.active { color: var(--accent); background: var(--accent-soft); }
 .segmented-btn { min-height: 40px; display: inline-flex; align-items: center; gap: var(--s-2); padding: 0 14px; }
 .role-label { margin-right: var(--s-1); color: var(--text-3); font-size: .8125rem; }
 .secondary-btn, .primary-btn {
@@ -373,7 +371,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .header-controls > .utility-btn { flex: 1 1 140px; min-width: 0; }
   .header-bottom-row { gap: 12px; }
   .role-switch-container, .industry-switch-container { align-items: flex-start; flex-direction: column; }
-  .segmented-control, .control-capsule { max-width: 100%; overflow-x: auto; }
+  .segmented-control { max-width: 100%; overflow-x: auto; }
   .segmented-btn { flex: 1; min-width: max-content; }
   .worker-tab-bar { top: 12px; width: 100%; }
   .tab-btn { flex: 1; }

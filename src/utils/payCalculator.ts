@@ -1,17 +1,30 @@
 import type { PayCalculationInput, PayCalculationResult, FormulaStep } from '../types'
 import { formatCurrency } from './formatCurrency'
 
+const finiteNonNegative = (value: number, max = Number.MAX_SAFE_INTEGER) =>
+  Number.isFinite(Number(value)) ? Math.min(max, Math.max(0, Number(value))) : 0
+
+/** Normalize every displayed and calculated value to the same supported bounds. */
+export function normalizePayInput(input: PayCalculationInput): PayCalculationInput {
+  return {
+    ...input,
+    hourlyRate: finiteNonNegative(input.hourlyRate, 1_000_000),
+    regularHours: finiteNonNegative(input.regularHours, 80),
+    overtimeHours: finiteNonNegative(input.overtimeHours, 50),
+    overtimeMultiplier: Math.min(3, Math.max(1, finiteNonNegative(input.overtimeMultiplier, 3) || 1.5)),
+    deductions: Array.isArray(input.deductions)
+      ? input.deductions.map((item) => ({ ...item, amount: finiteNonNegative(item.amount, 1_000_000_000) }))
+      : [],
+  }
+}
+
 /**
  * Calculates fair pay with explicit mathematical steps and zero hidden deductions.
  * Protects against negative inputs and invalid rates.
  */
 export function calculatePay(input: PayCalculationInput): PayCalculationResult {
-  const finiteNonNegative = (value: number, max = Number.MAX_SAFE_INTEGER) =>
-    Number.isFinite(Number(value)) ? Math.min(max, Math.max(0, Number(value))) : 0
-  const hourlyRate = finiteNonNegative(input.hourlyRate, 1_000_000)
-  const regularHours = finiteNonNegative(input.regularHours, 80)
-  const overtimeHours = finiteNonNegative(input.overtimeHours, 50)
-  const overtimeMultiplier = Math.min(3, Math.max(1, finiteNonNegative(input.overtimeMultiplier, 3) || 1.5))
+  const normalized = normalizePayInput(input)
+  const { hourlyRate, regularHours, overtimeHours, overtimeMultiplier } = normalized
 
   // Step 1: Regular Pay
   const regularPay = Math.round(regularHours * hourlyRate * 100) / 100
@@ -23,8 +36,7 @@ export function calculatePay(input: PayCalculationInput): PayCalculationResult {
   const grossPay = Math.round((regularPay + overtimePay) * 100) / 100
 
   // Step 4: Deductions (validate amounts)
-  const deductionsList = Array.isArray(input.deductions) ? input.deductions : []
-  const normalizedDeductions = deductionsList.map((item) => ({ ...item, amount: finiteNonNegative(item.amount, 1_000_000_000) }))
+  const normalizedDeductions = normalized.deductions
   const totalDeductions = Math.round(
     normalizedDeductions.reduce((sum, item) => sum + item.amount, 0) * 100
   ) / 100

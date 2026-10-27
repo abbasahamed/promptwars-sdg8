@@ -1,5 +1,6 @@
 import type { WorkerProfile, GrievanceReport, Industry, ReportStatus, ReportStatusUpdate } from '../types'
 import { SEED_WORKERS, SEED_REPORTS } from '../data/seedData'
+import { isSampleReport } from '../utils/reportUtils'
 
 let memoryWorkers: WorkerProfile[] | null = null
 let memoryReports: GrievanceReport[] | null = null
@@ -94,28 +95,26 @@ export function saveWorker(updatedWorker: WorkerProfile): void {
  * Retrieves reports filtered for the WORKER perspective.
  * If workerName is supplied, highlights their submitted reports.
  */
-export function getReportsForWorker(industry?: Industry, workerName?: string): GrievanceReport[] {
+export function getReportsForWorker(industry?: Industry, workerId?: string): GrievanceReport[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.REPORTS)
     const list: GrievanceReport[] = raw ? JSON.parse(raw) : cloneReports()
-    const trimmed = workerName?.trim().toLowerCase()
     const filtered = list.filter((r) => {
       if (industry && r.industry !== industry) return false
-      const sample = r.id.startsWith('rep-con-') || r.id.startsWith('rep-cmp-')
-      return sample || (!r.isAnonymous && Boolean(trimmed) && r.reporterName?.trim().toLowerCase() === trimmed)
+      return isSampleReport(r) || (Boolean(workerId) && r.reporterId === workerId)
     })
 
     return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch {
-    return (memoryReports ?? cloneReports()).filter((r) => (!industry || r.industry === industry) && (r.id.startsWith('rep-con-') || r.id.startsWith('rep-cmp-')) && (!workerName?.trim() || !r.isAnonymous && r.reporterName?.trim().toLowerCase() === workerName.trim().toLowerCase()))
+    return (memoryReports ?? cloneReports()).filter((r) => (!industry || r.industry === industry) && (isSampleReport(r) || Boolean(workerId) && r.reporterId === workerId))
   }
 }
 
 /**
  * Retrieves reports for the EMPLOYER perspective.
  * CRITICAL PRIVACY ARCHITECTURE:
- * Any report flagged with isAnonymous: true has its reporterName and reporterRole
- * explicitly redacted so it cannot be viewed by ordinary employer view.
+ * Anonymous identity fields are omitted from the employer-facing view. This is
+ * UI filtering only; browser localStorage is not a secure privacy boundary.
  */
 export function getReportsForEmployer(industry?: Industry): GrievanceReport[] {
   try {
@@ -130,6 +129,7 @@ export function getReportsForEmployer(industry?: Industry): GrievanceReport[] {
           ...rep,
           reporterName: '[Protected - Anonymous Report]',
           reporterRole: undefined,
+          reporterId: undefined,
         }
       }
       return rep
@@ -137,7 +137,7 @@ export function getReportsForEmployer(industry?: Industry): GrievanceReport[] {
 
     return sanitized.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch {
-    return (memoryReports ?? cloneReports()).filter((report) => !industry || report.industry === industry).map((r) => (r.isAnonymous ? { ...r, reporterName: '[Protected - Anonymous Report]', reporterRole: undefined } : { ...r }))
+    return (memoryReports ?? cloneReports()).filter((report) => !industry || report.industry === industry).map((r) => (r.isAnonymous ? { ...r, reporterName: '[Protected - Anonymous Report]', reporterRole: undefined, reporterId: undefined } : { ...r }))
   }
 }
 

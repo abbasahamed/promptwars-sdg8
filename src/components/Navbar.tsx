@@ -41,11 +41,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="header-primary-controls">
           <div className="role-switch-container">
             <span className="role-label">{t.switchRole}:</span>
-            <div className="segmented-control" role="tablist">
+            <div className="segmented-control" role="group" aria-label={t.switchRole}>
               <button
                 type="button"
-                role="tab"
-                aria-selected={role === 'worker'}
+                aria-pressed={role === 'worker'}
                 className={`segmented-btn ${role === 'worker' ? 'selected worker-theme' : ''}`}
                 onClick={() => setRole('worker')}
               >
@@ -53,8 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={role === 'employer'}
+                aria-pressed={role === 'employer'}
                 className={`segmented-btn ${role === 'employer' ? 'selected employer-theme' : ''}`}
                 onClick={() => setRole('employer')}
               >

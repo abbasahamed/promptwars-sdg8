@@ -8,6 +8,7 @@ import { SafeVoiceReport } from './components/SafeVoiceReport'
 import { EmployerDashboard } from './components/EmployerDashboard'
 import { IndustryAdoptionModal } from './components/IndustryAdoptionModal'
 import { Icon } from './components/Icon'
+import { useDialogAccessibility } from './hooks/useDialogAccessibility'
 import './App.css'
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const [showAdoptionGuide, setShowAdoptionGuide] = useState<boolean>(false)
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false)
   const [storageVersion, setStorageVersion] = useState<number>(1)
+  const resetDialogRef = useDialogAccessibility(showResetConfirm, () => setShowResetConfirm(false))
 
   // Initialize demo data on load
   useEffect(() => {
@@ -89,7 +91,7 @@ export default function App() {
 
       {/* Reset Demo Data Confirmation Modal */}
       {showResetConfirm && (
-         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
+         <div ref={resetDialogRef} tabIndex={-1} className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
            <div className="modal-card modal-sm">
              <div className="modal-header">
             <h3 id="reset-dialog-title" className="modal-title"><Icon name="refresh" size={20} /> {t.resetDataBtn}</h3>

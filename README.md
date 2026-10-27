@@ -5,11 +5,11 @@
 [![React](https://img.shields.io/badge/React-19.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![Hosting](https://img.shields.io/badge/Google%20Cloud%20Run-Containerized-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
+[![Hosting](https://img.shields.io/badge/Hosting-Vercel-black?logo=vercel&logoColor=white)](https://vercel.com/)
 
-**FairShift** is a mobile-first, decentralized workforce empowerment and compliance platform built for employee-intensive organizations under **UN Sustainable Development Goal 8 (Decent Work & Economic Growth)**. 
+**FairShift** is a responsive workforce demo that connects sample wage calculations, workplace reports, and manager review flows to **UN Sustainable Development Goal 8 (Decent Work & Economic Growth)**.
 
-Targeting high-risk, labor-heavy sectors—specifically **Construction Sites** and **Campus & University Facilities**—FairShift bridges the trust deficit between frontline staff, subcontracted personnel, and organizational leadership through transparent wage calculation, safe grievance escalation, and automated fatigue monitoring.
+Targeting high-risk, labor-heavy sectors—specifically **Construction Sites** and **Campus & University Facilities**—FairShift demonstrates how itemized pay calculations, local report tracking, and weekly-hours review can support frontline workers and operations teams.
 
 ---
 
@@ -18,7 +18,7 @@ Targeting high-risk, labor-heavy sectors—specifically **Construction Sites** a
 In labor-intensive industries like civil construction and higher-education campus facilities, frontline workers face systematic vulnerabilities:
 1. **Opaque & Disputed Pay:** Complex overtime multipliers, unrecorded night shifts, and unauthorized deductions create wage theft and tension.
 2. **Fear of Grievance Retaliation:** Workers who notice safety hazards (faulty scaffolding, exposed high-voltage wiring, chemical fumes) hesitate to report them for fear of job termination or blacklisting.
-3. **Severe Fatigue & Workplace Accidents:** Unmonitored overtime shifts exceed safe physiological thresholds, directly causing worksite fatalities and chronic burnout under UN SDG 8.8.
+3. **Long Hours & Workplace Risk:** Extended shifts can contribute to fatigue and increase risks in physically demanding or safety-sensitive work.
 4. **Management Blindspots:** Operations supervisors lack consolidated visibility into subcontractor hours, safety hot-spots, and pending workforce disputes.
 
 ---
@@ -27,76 +27,62 @@ In labor-intensive industries like civil construction and higher-education campu
 
 FairShift provides worker and employer demo interfaces in English:
 - **Worker Mode:** Provides itemized wage breakdowns and a local **SafeVoice** reporting demo with reference tracking. Reports are stored in browser localStorage and this prototype does not provide secure anonymity.
-- **Employer / Admin Mode:** Delivers operational compliance oversight, automated excessive-hours fatigue alerts, and an auditable grievance triage workflow.
-- **Cross-Industry Context:** Demonstrates immediate operational adaptation across **Construction Sites** (scaffolders, crane riggers, rebar crews) and **Campus Facilities** (hostel housekeeping, electrical techs, dining sanitation teams).
+- **Employer / Admin Mode:** Summarizes sample worker hours, overtime, open reports, and fatigue threshold alerts; managers can update report status in this browser.
+- **Cross-Industry Context:** Provides distinct sample workers, reports, and role-specific examples for **Construction Sites** (scaffolders, crane riggers, rebar crews) and **Campus Facilities** (hostel housekeeping, electrical techs, dining sanitation teams).
 
 ---
 
 ## 🚀 Three Core Implemented Features
 
 ### Feature A — Transparent Pay Calculator & Salary Slip
-- **Explicit Mathematical Formulas:** Computes regular earnings ($hours \times rate$), overtime earnings ($OT\_hours \times rate \times multiplier$), approved itemized deductions (safety gear deposits, meal subsidies, festival advance recoveries), and net take-home pay.
-- **One-Click Realistic Presets:** Instantly load real-world worker profiles for construction (e.g., *Rajesh Kumar - Scaffolding Lead*) or campus facilities (e.g., *Selvi M. - Hostel Housekeeping*).
-- **Step-by-Step Breakdown:** An interactive, expandable mathematical audit trail showing every calculation step to eliminate contractor confusion.
+- **Explicit formulas:** Calculates regular earnings, overtime earnings, itemized deductions, and non-negative net pay from the displayed inputs.
+- **Industry sample profiles:** Load construction and campus worker examples with distinct hours, rates, and deductions.
+- **Step-by-step breakdown:** Expand the calculation details to review the formula and values used.
 - **Statutory Notice:** Clear legal disclosure that the tool provides transparent wage visibility under SDG 8.3/8.5 without claiming to replace statutory tax/provident fund records.
 
-### Feature B — SafeVoice Workplace Reporting (Anonymous Demo Mode)
+### Feature B — SafeVoice Workplace Reporting (Local Demo)
 - **Multi-Category Escalation:** File tickets for *Safety Hazards*, *Wage Delays*, *Working Conditions / Heat Stress*, or *Harassment*.
-- **Privacy Architecture:** Toggle *"Submit without attaching my name"* to sanitize the worker's name and role from the ordinary employer triage feed, ensuring whistleblower safety.
-- **Real-Time Ticket Tracking:** Generates verifiable reference codes (e.g. `FS-CON-8492` or `FS-CMP-3101`) with live status chips (`Submitted` ➔ `Under Review` ➔ `Action Taken` ➔ `Resolved`).
-- **Report Status History:** The demo shows status history for sample reports and reports submitted in the current browser session.
+- **Name omission:** The optional name field is omitted from an anonymous report in the ordinary employer view. This is a UI behavior, not secure anonymity; reports and profile links are stored in localStorage.
+- **Reference and status tracking:** Creates a reference code and displays submitted, review, action, and resolved states. Data stays in the current browser and is not synchronized.
+- **Profile-linked demo feed:** Select a sample worker profile to see its submitted reports after reload. The selector does not authenticate the worker or restrict access on a shared browser.
 
 ### Feature C — Employer Insights & Fatigue Monitoring
 - **Workforce KPI Summary:** Track total active workforce, aggregate weekly overtime hours, pending grievances, and flagged fatigue violations.
-- **Automated Fatigue Warnings (UN SDG 8.8):** A configurable threshold engine (default: 48h/week) that flags personnel exceeding safe shift limits, categorizing alerts into *Warning* or *Critical Fatigue* with concrete mitigation instructions (e.g., mandatory 24h rest before operating high-altitude equipment or rotating night sanitation shifts).
-- **Incident Triage Center:** Filter by category and status, inspect ticket summaries, update operational status, and record verified corrective actions.
+- **Weekly-hours review (SDG 8.8):** A configurable threshold flags sample profiles for manager review, with context-specific prompts for construction and campus shift patterns. These are demo indicators, not legal findings or enforced rest rules.
+- **Report triage:** Filter by category and status, inspect report summaries, and record status updates and notes in local browser storage.
 
 ---
 
 ## 🌐 Cross-Industry Adoption Blueprints
 
-| Industry Context | Target Frontline Workforce | Key Operational Vulnerabilities | FairShift Real-World Deployment |
+| Industry Context | Sample Workforce | Example Concern | Demo Workflow |
 | :--- | :--- | :--- | :--- |
-| **🏗️ Construction Sites** | Scaffolding leads, concrete masons, crane riggers, site electricians | High-altitude falls, night pour overtime omissions, hydration depletion in extreme heat | **On-site QR kiosks:** Workers review sample wages and submit concerns through the local demo. |
-| **🎓 Campus Facilities** | Hostel housekeeping, HVAC/electrical techs, dining sanitation staff | Exposed corridor wiring, solvent fumes in chemical depots, delayed weekend event pay | **Institutional Administrative Oversight:** Facility deans cross-audit contractor muster rolls against logged SafeVoice disputes to ensure fair wage compliance. |
+| **🏗️ Construction Sites** | Scaffolding leads, concrete masons, crane riggers, site electricians | Loose scaffold clamps, omitted night-pour overtime, and water shortages appear in sample reports. | Review sample wages, flag extended hours, and submit a site concern. |
+| **🎓 Campus Facilities** | Hostel housekeeping, HVAC/electrical techs, dining sanitation staff | Sample reports cover electrical panels, chemical storage, and delayed event overtime. | Review campus pay examples, flag extended shifts, and update a report status. |
 
 ---
 
 ## 🎯 UN Sustainable Development Goal 8 Alignment
 
-- **Target 8.3 (Formalization & Decent Jobs):** Itemized deductions eliminate predatory contractor skimming and wage ambiguity.
-- **Target 8.5 (Equal Pay for Equal Work):** Transparent hourly rates and standard overtime multipliers across all shifts.
-- **Target 8.8 (Safe & Secure Working Environments):** Whistleblower hazard escalation combined with physiological shift fatigue limits prevents avoidable worksite injuries.
+- **Target 8.3:** Itemized pay examples show how recording earnings and deductions can support transparent wage discussions.
+- **Target 8.5:** Comparing rates and overtime inputs makes the calculation behind a sample pay estimate visible.
+- **Target 8.8:** Hazard reports and extended-hours alerts give managers demo workflows for reviewing workplace risks; they do not prevent incidents or provide protected reporting.
 
 ---
 
 ## 🏛️ Architecture & Data Flow
 
 ```text
-[ Frontline Worker Device ]             [ Operations Admin / Supervisor ]
-            │                                           │
-            ├─► Transparent Pay Calculator              │
-            │   (Pure functional math, non-negative)    │
-            │                                           │
-            ├─► SafeVoice Incident Submission           │
-            │   (Anonymous redaction filter)            │
-            │                  │                        │
-            │                  ▼                        │
-            │       ┌───────────────────────┐           │
-            │       │ LocalStorage Service  │◄──────────┤
-            │       │ (Centralized Storage) │           │
-            │       └───────────────────────┘           │
-            │                  │                        ▼
-            │                  └───────────────► Employer Dashboard
-            │                                    ├─ Fatigue Rules Engine
-            │                                    ├─ Incident Triage Center
-            ▼                                    └─ Audit Trail Status Updates
-[ Live Status Tracking Feed ] ◄─────────────────────────────────┘
+Worker demo UI ──► localStorage ◄── Employer demo UI
+     │                                  │
+     ├─ pay calculator                  ├─ sample workforce indicators
+     └─ profile-linked reports          └─ local report status updates
 ```
 
-- **Persistence Layer:** Client-side demonstration storage (`localStorage`) with automated seed restoration on first launch.
-- **Zero Secrets / Zero Backend Overhead:** Fast, offline-first client architecture requiring zero external API keys or simulated black-box services.
-- **Repository Footprint:** Strictly lightweight (~350 KB source footprint; well under the 10 MB limit).
+- **Persistence:** Sample data and demo changes are stored in the current browser. There is no backend, authentication, or cross-device synchronization.
+- **Privacy:** The profile selector and anonymous-name toggle are presentation behavior only. Anyone with access to the same browser profile may inspect or change stored data; do not enter sensitive information.
+
+
 
 ---
 
@@ -129,7 +115,7 @@ npm run typecheck
 # 2. High-performance Linter
 npm run lint
 
-# 3. Unit Tests (Pay calculations & fatigue algorithms)
+# 3. Unit Tests (Pay, fatigue, industry samples, and report workflows)
 npm test
 
 # 4. Production Build Verification
@@ -141,33 +127,38 @@ npm run preview
 
 ---
 
-## ☁️ Google Cloud Run Deployment
+## ☁️ Deployment
 
-FairShift is packaged with a multi-stage `Dockerfile` and an automated deployment script tailored for Google Cloud Run:
+The Vite app is deployed on Vercel: [promptwars-sdg8.vercel.app](https://promptwars-sdg8.vercel.app/). Vercel builds with `npm run build` and serves the generated `dist/` directory.
+
+For local production verification:
 
 ```bash
-# Deploy directly from source via Google Cloud SDK
+npm run build
+npm run preview
+```
+
+### Optional container and Cloud Run alternatives
+
+Vercel is the current hosting target. The repository also retains a Dockerfile and a Cloud Run helper for teams that need a container deployment. These alternatives are optional and are not required for the Vercel build.
+
+```bash
+# Build and run the container locally
+docker build -t fairshift .
+docker run --rm -p 8080:8080 fairshift
+
+# Optional: deploy to Cloud Run after configuring Google Cloud CLI and project access
 ./deploy-cloudrun.sh
 ```
 
-Or manually:
-```bash
-gcloud run deploy fairshift-sdg8 \
-  --source . \
-  --region asia-south1 \
-  --platform managed \
-  --allow-unauthenticated
-```
-
-- **Container Architecture:** Node 22 Alpine builder compiles Vite production bundle ➔ Nginx 1.27 Alpine serves static files with dynamic `${PORT}` binding and SPA fallback.
-- **Healthcheck:** Dedicated `/healthz` endpoint returning HTTP 200 for container orchestrator liveness checks.
+The Cloud Run helper uses the active `gcloud` project and requires the caller to have the relevant Google Cloud permissions.
 
 ---
 
 ## 🔒 Prototype Limitations & Security Disclosures
 
-1. **Demonstration Storage:** This prototype uses client-side `localStorage` for self-contained hackathon evaluation. In an enterprise production deployment, this would connect to an authenticated, encrypted PostgreSQL / Cloud SQL backend with row-level security (RLS).
-2. **SafeVoice Reporting:** Reports are stored in browser localStorage. The demo omits the reporter name when requested, but localStorage is not secure or production-grade anonymity. Do not submit sensitive information.
+1. **Demonstration Storage:** This prototype uses client-side `localStorage`. It has no authenticated backend, server-side access controls, or cross-device data synchronization.
+2. **SafeVoice Reporting:** The anonymous-name toggle omits the reporter name from the employer-facing UI. Profile links and reports remain in browser storage; this is not secure or production-grade anonymity. Do not submit sensitive information.
 3. **Statutory Payroll:** Rates and multipliers are illustrative and configurable. Production payroll must interface with regional statutory PF, ESI, and tax deduction calculators.
 
 ---
@@ -175,10 +166,9 @@ gcloud run deploy fairshift-sdg8 \
 ## 👥 Hackathon Submission Checklist
 
 - [x] **Repository URL:** `https://github.com/abbasahamed/promptwars-sdg8.git`
-- [x] **Single Branch:** `main` (no temporary or dirty branches)
-- [x] **Repository Size:** Under 10 MB (actual: ~350 KB)
+- [x] **Primary Branch:** `main`
 - [x] **Zero Secrets / Bloat:** `.env`, `node_modules`, `dist` excluded via `.gitignore`
 - [x] **Three Core Working Features:** Transparent Pay, SafeVoice, Employer Dashboard
 - [x] **English Interface:** English-only demo UI
-- [x] **Automated Tests:** 4/4 passing unit test suite
-- [x] **Cloud Run Deployment Pipeline:** `Dockerfile`, `nginx.conf.template`, `deploy-cloudrun.sh`
+- [x] **Automated Tests:** Vitest unit tests for pay, fatigue, and report workflows
+- [x] **Vercel Deployment:** React + TypeScript + Vite production build

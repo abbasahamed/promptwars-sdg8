@@ -1,6 +1,7 @@
 import React from 'react'
 import { translations } from '../i18n/translations'
 import { Icon } from './Icon'
+import { useDialogAccessibility } from '../hooks/useDialogAccessibility'
 
 interface IndustryAdoptionModalProps {
   onClose: () => void
@@ -10,9 +11,10 @@ export const IndustryAdoptionModal: React.FC<IndustryAdoptionModalProps> = ({
   onClose,
 }) => {
   const t = translations.en
+  const dialogRef = useDialogAccessibility(true, onClose)
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="adoption-dialog-title">
+    <div ref={dialogRef} tabIndex={-1} className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="adoption-dialog-title">
       <div className="modal-card adoption-modal-card">
         <div className="modal-header">
           <div>

@@ -9,14 +9,21 @@ export function evaluateWorkforceFatigue(
   thresholdHours: number = 48
 ): FatigueAlert[] {
   const alerts: FatigueAlert[] = []
+  const effectiveThreshold = Number.isFinite(thresholdHours)
+    ? Math.min(168, Math.max(0, thresholdHours))
+    : 48
 
   for (const worker of workers) {
-    const reg = Math.max(0, worker.loggedRegularHours || 0)
-    const ot = Math.max(0, worker.loggedOvertimeHours || 0)
+    const reg = Number.isFinite(worker.loggedRegularHours)
+      ? Math.min(168, Math.max(0, worker.loggedRegularHours))
+      : 0
+    const ot = Number.isFinite(worker.loggedOvertimeHours)
+      ? Math.min(168, Math.max(0, worker.loggedOvertimeHours))
+      : 0
     const total = reg + ot
 
-    if (total > thresholdHours) {
-      const isCritical = total >= thresholdHours + 10
+    if (total > effectiveThreshold) {
+      const isCritical = total >= effectiveThreshold + 10
       const recommendation = getIndustryFatigueRecommendation(worker.industry, total, isCritical)
 
       alerts.push({
@@ -27,7 +34,7 @@ export function evaluateWorkforceFatigue(
         totalHours: total,
         regularHours: reg,
         overtimeHours: ot,
-        thresholdHours,
+        thresholdHours: effectiveThreshold,
         severity: isCritical ? 'critical' : 'warning',
         recommendation,
       })
@@ -45,14 +52,14 @@ function getIndustryFatigueRecommendation(
 ): string {
   if (industry === 'construction') {
     if (isCritical) {
-      return `Critical Fatigue (${totalHours}h logged): Mandatory 24-hour stand-down required before operating heavy equipment or high-altitude scaffolding (OSHA / SDG 8.8 safe work guidelines).`
+      return `Critical hours (${totalHours}h logged): Review the schedule and arrange adequate rest before high-risk equipment or scaffolding work.`
     }
-    return `Elevated Hours (${totalHours}h logged): Cap remaining shifts this week; schedule mandatory hydration and thermal rest breaks on site.`
+    return `Elevated hours (${totalHours}h logged): Review the remaining shift plan and schedule hydration and heat-rest breaks on site.`
   }
 
   // Campus Facilities
   if (isCritical) {
-    return `Critical Shift Load (${totalHours}h logged): Reassign consecutive night sanitation / electrical maintenance duties immediately to prevent hazard fatigue.`
+    return `Critical hours (${totalHours}h logged): Review consecutive night sanitation or electrical maintenance shifts and arrange adequate rest.`
   }
-  return `Elevated Hours (${totalHours}h logged): Enforce maximum 8-hour consecutive shift cap for hostel and campus facilities team.`
+  return `Elevated hours (${totalHours}h logged): Review consecutive campus shifts and plan adequate recovery time between duties.`
 }

@@ -17,7 +17,6 @@ export type IconName =
   | 'graduation'
   | 'hammer'
   | 'info'
-  | 'language'
   | 'lock'
   | 'map-pin'
   | 'minus'
@@ -65,7 +64,6 @@ export function Icon({ name, size = 20, ...props }: IconProps) {
     graduation: <><path d="m2 8 8-4 8 4-8 4-8-4Z" /><path d="M5 10.2V14c2.8 2.2 7.2 2.2 10 0v-3.8M18 8v5" /></>,
     hammer: <><path d="m4 4 6 6M3 7l4-4 3 3-4 4-3-3ZM10 10l6.5 6.5M14 16l2-2 2 2-2 2-2-2Z" /></>,
     info: <><circle cx="10" cy="10" r="7.5" /><path d="M10 9v5M10 6.5h.01" /></>,
-    language: <><path d="M3 5h8M7 3v2c0 3-1.5 5.5-4 7M5 8c1 1.5 2.4 2.6 4 3.3M12 17l3-8 3 8M13 14h4" /></>,
     lock: <><rect x="3.5" y="8" width="13" height="10" rx="2" /><path d="M6 8V5.8a4 4 0 0 1 8 0V8M10 12v2" /></>,
     'map-pin': <><path d="M16 8.3c0 4.2-6 9.2-6 9.2s-6-5-6-9.2a6 6 0 1 1 12 0Z" /><circle cx="10" cy="8" r="1.8" /></>,
     minus: <path d="M5 10h10" />,

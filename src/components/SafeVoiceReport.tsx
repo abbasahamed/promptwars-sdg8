@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
 import type { ReportCategory, ReportPriority, Industry, GrievanceReport } from '../types'
 import { translations } from '../i18n/translations'
-import { submitReport, getReportsForWorker } from '../services/storageService'
+import { getWorkers, submitReport, getReportsForWorker } from '../services/storageService'
 import { Icon } from './Icon'
+import { isSampleReport } from '../utils/reportUtils'
 
 interface SafeVoiceReportProps { industry: Industry }
 
 export const SafeVoiceReport: React.FC<SafeVoiceReportProps> = ({ industry }) => {
   const t = translations.en
+  const workers = getWorkers(industry)
+  const [selectedWorkerId, setSelectedWorkerId] = useState(workers[0]?.id ?? '')
+  const selectedWorker = workers.find((worker) => worker.id === selectedWorkerId)
   const [category, setCategory] = useState<ReportCategory>('safety_hazard')
   const [priority, setPriority] = useState<ReportPriority>('high')
   const [worksite, setWorksite] = useState(industry === 'construction' ? 'Metro Tower - Sector 4 Scaffolding' : 'Science Block C - Chemical Storage')
@@ -18,7 +22,7 @@ export const SafeVoiceReport: React.FC<SafeVoiceReportProps> = ({ industry }) =>
   const [urgent, setUrgent] = useState(false)
   const [submissionFeedback, setSubmissionFeedback] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
-  const [reports, setReports] = useState<GrievanceReport[]>(() => getReportsForWorker(industry))
+  const [reports, setReports] = useState<GrievanceReport[]>(() => getReportsForWorker(industry, workers[0]?.id))
 
   const worksitePresets = industry === 'construction'
     ? ['Metro Tower - Sector 4 Scaffolding', 'Tower A - Level 6 Concrete Pour', 'Reinforcement Steel Yard', 'Temporary Power Substation 2', 'Basement Excavation Trench B']
@@ -40,13 +44,15 @@ export const SafeVoiceReport: React.FC<SafeVoiceReportProps> = ({ industry }) =>
     setFormError(null)
     const newReport = submitReport({
       industry,
+      reporterId: selectedWorkerId,
       worksite: worksite.trim() || worksitePresets[0],
       category,
       priority: urgent ? 'critical' : priority,
       title: title.trim(),
       description: description.trim(),
       isAnonymous,
-      reporterName: isAnonymous ? undefined : reporterName.trim() || 'Worker',
+      reporterName: isAnonymous ? undefined : reporterName.trim() || selectedWorker?.name || 'Worker',
+      reporterRole: isAnonymous ? undefined : selectedWorker?.roleTitle,
       urgent,
     })
     setSubmissionFeedback(newReport.referenceCode)
@@ -74,6 +80,7 @@ export const SafeVoiceReport: React.FC<SafeVoiceReportProps> = ({ industry }) =>
           {formError && <div id="report-form-error" className="alert-banner alert-error" role="alert"><Icon name="alert" size={17} /> {formError}</div>}
 
           <form onSubmit={handleSubmit} className="report-form" noValidate>
+            <div className="form-field"><label htmlFor="reporter-profile-select" className="input-label">{t.reportingAs}</label><select id="reporter-profile-select" className="select-input" value={selectedWorkerId} onChange={(e) => { const workerId = e.target.value; setSelectedWorkerId(workerId); setReports(getReportsForWorker(industry, workerId)); setReporterName('') }}>{workers.map((worker) => <option key={worker.id} value={worker.id}>{worker.name} · {worker.roleTitle}</option>)}</select><small className="text-secondary">{t.profileDemoNotice}</small></div>
             <div className="form-field"><label htmlFor="report-cat-select" className="input-label">{t.reportCategory} <span aria-hidden="true">*</span></label><select id="report-cat-select" className="select-input" value={category} onChange={(e) => setCategory(e.target.value as ReportCategory)}><option value="safety_hazard">{t.catHazard}</option><option value="wage_concern">{t.catWage}</option><option value="working_conditions">{t.catConditions}</option><option value="harassment">{t.catHarassment}</option></select></div>
             <div className="form-field"><label htmlFor="report-site-select" className="input-label">{t.worksiteLocation} <span aria-hidden="true">*</span></label><select id="report-site-select" className="select-input" value={worksite} onChange={(e) => setWorksite(e.target.value)}>{worksitePresets.map((loc) => <option key={loc} value={loc}>{loc}</option>)}</select></div>
             <div className="form-field"><label htmlFor="report-title-input" className="input-label">{t.issueTitle} <span aria-hidden="true">*</span></label><input id="report-title-input" type="text" required maxLength={100} placeholder={t.issueTitlePlaceholder} className="text-input" value={title} onChange={(e) => setTitle(e.target.value)} aria-describedby={formError ? 'report-form-error' : undefined} /></div>
@@ -94,10 +101,10 @@ export const SafeVoiceReport: React.FC<SafeVoiceReportProps> = ({ industry }) =>
           <div className="panel-header-with-action"><div><span className="section-kicker">02</span><h3 id="my-reports-heading" className="panel-title">{t.myReportsTitle}</h3></div><span className="count-badge">{reports.length} {t.tracked}</span></div>
           <div className="reports-list">
             {reports.map((report) => <article key={report.id} className={`report-card ${report.urgent ? 'report-card-urgent' : ''}`}>
-              <div className="report-card-top"><div className="ref-and-badge"><span className="ref-code font-mono">{report.referenceCode}</span>{(report.id.startsWith('rep-con-') || report.id.startsWith('rep-cmp-')) && <span className="meta-tag">Sample report</span>}{getStatusBadge(report.status)}{report.urgent && <span className="urgent-badge"><Icon name="alert" size={13} /> {t.urgent}</span>}</div><span className="report-date">{report.createdAt}</span></div>
+              <div className="report-card-top"><div className="ref-and-badge"><span className="ref-code font-mono">{report.referenceCode}</span>{isSampleReport(report) && <span className="meta-tag">Sample report</span>}{getStatusBadge(report.status)}{report.urgent && <span className="urgent-badge"><Icon name="alert" size={13} /> {t.urgent}</span>}</div><span className="report-date">{report.createdAt}</span></div>
               <h4 className="report-title">{report.title}</h4><p className="report-desc">{report.description}</p>
               <div className="report-meta"><span className="meta-tag"><Icon name="file" size={14} /> {getCategoryLabel(report.category)}</span><span className="meta-tag"><Icon name="map-pin" size={14} /> {report.worksite}</span>{report.isAnonymous ? <span className="meta-tag anonymous-tag"><Icon name="lock" size={14} /> {t.anonymousBadge}</span> : <span className="meta-tag"><Icon name="user" size={14} /> {report.reporterName || t.workerFallback}</span>}</div>
-              {report.history && report.history.length > 0 && <div className="report-history"><span className="history-header">{t.updatesHistory}</span><ul className="history-list">{report.history.map((history, index) => <li key={index} className="history-item"><span className="history-bullet"><Icon name="chevron-right" size={14} /></span><div><div className="history-meta"><strong>{history.status}</strong> · {history.updatedBy} · {history.timestamp}</div><p className="history-note">{history.note}</p></div></li>)}</ul></div>}
+              {report.history && report.history.length > 0 && <div className="report-history"><span className="history-header">{t.updatesHistory}</span><ul className="history-list">{report.history.map((history, index) => <li key={index} className="history-item"><span className="history-bullet"><Icon name="chevron-right" size={14} /></span><div><div className="history-meta"><strong>{getStatusBadge(history.status)}</strong> · {history.updatedBy} · {history.timestamp}</div><p className="history-note">{history.note}</p></div></li>)}</ul></div>}
             </article>)}
             {reports.length === 0 && <div className="empty-state"><Icon name="file" size={24} /><p>{t.noReportsYet}</p></div>}
           </div>

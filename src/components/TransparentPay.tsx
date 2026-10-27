@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import type { WorkerProfile, DeductionItem, Industry } from '../types'
-import { calculatePay } from '../utils/payCalculator'
+import { calculatePay, normalizePayInput } from '../utils/payCalculator'
 import { translations } from '../i18n/translations'
 import { getWorkers } from '../services/storageService'
 import { Icon } from './Icon'
@@ -8,7 +8,6 @@ import { formatCurrency } from '../utils/formatCurrency'
 
 interface TransparentPayProps {
   industry: Industry
-  onHoursUpdated?: (workerId: string, reg: number, ot: number) => void
 }
 
 export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
@@ -52,7 +51,7 @@ export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
     setNewDeductionAmount('')
   }
 
-  const payResult = calculatePay({
+  const normalizedPayInput = normalizePayInput({
     workerName,
     payPeriod,
     hourlyRate,
@@ -61,6 +60,7 @@ export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
     overtimeMultiplier,
     deductions,
   })
+  const payResult = calculatePay(normalizedPayInput)
 
   return (
     <div className="feature-container" id="transparent-pay-section">
@@ -116,15 +116,15 @@ export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
             </div>
             <div className="form-field">
               <label htmlFor="hourly-rate-input" className="input-label">{t.hourlyRate}</label>
-              <input id="hourly-rate-input" type="number" min="0" step="5" className="text-input" value={hourlyRate} onChange={(e) => setHourlyRate(Math.max(0, Number(e.target.value)))} />
+              <input id="hourly-rate-input" type="number" min="0" step="5" className="text-input" value={hourlyRate} onChange={(e) => setHourlyRate(Math.min(1_000_000, Math.max(0, Number(e.target.value) || 0)))} max="1000000" />
             </div>
             <div className="form-field">
               <label htmlFor="regular-hours-input" className="input-label">{t.regularHours}</label>
-              <input id="regular-hours-input" type="number" min="0" max="80" step="1" className="text-input" value={regularHours} onChange={(e) => setRegularHours(Math.max(0, Number(e.target.value)))} />
+              <input id="regular-hours-input" type="number" min="0" max="80" step="1" className="text-input" value={regularHours} onChange={(e) => setRegularHours(Math.min(80, Math.max(0, Number(e.target.value) || 0)))} />
             </div>
             <div className="form-field">
               <label htmlFor="overtime-hours-input" className="input-label">{t.overtimeHours}</label>
-              <input id="overtime-hours-input" type="number" min="0" max="50" step="0.5" className="text-input" value={overtimeHours} onChange={(e) => setOvertimeHours(Math.max(0, Number(e.target.value)))} />
+              <input id="overtime-hours-input" type="number" min="0" max="50" step="0.5" className="text-input" value={overtimeHours} onChange={(e) => setOvertimeHours(Math.min(50, Math.max(0, Number(e.target.value) || 0)))} />
             </div>
             <div className="form-field">
               <label htmlFor="ot-multiplier-select" className="input-label">{t.otMultiplier}</label>
@@ -157,8 +157,10 @@ export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
               {deductions.length === 0 && <p className="empty-subtext">{t.noDeductions}</p>}
             </div>
             <form onSubmit={handleAddDeduction} className="add-deduction-row">
-              <input type="text" placeholder={t.deductionReason} className="text-input flex-2" value={newDeductionLabel} onChange={(e) => setNewDeductionLabel(e.target.value)} />
-              <input type="number" placeholder={t.amount} className="text-input flex-1" min="0" step="10" value={newDeductionAmount} onChange={(e) => setNewDeductionAmount(e.target.value)} />
+              <label className="sr-only" htmlFor="new-deduction-label">{t.deductionReason}</label>
+              <input id="new-deduction-label" type="text" placeholder={t.deductionReason} className="text-input flex-2" value={newDeductionLabel} onChange={(e) => setNewDeductionLabel(e.target.value)} />
+              <label className="sr-only" htmlFor="new-deduction-amount">{t.amount}</label>
+              <input id="new-deduction-amount" type="number" placeholder={t.amount} className="text-input flex-1" min="0" max="1000000000" step="0.01" value={newDeductionAmount} onChange={(e) => setNewDeductionAmount(e.target.value)} />
               <button type="submit" className="secondary-btn"><Icon name="plus" size={16} /> {t.addDeduction}</button>
             </form>
           </div>
@@ -174,8 +176,8 @@ export const TransparentPay: React.FC<TransparentPayProps> = ({ industry }) => {
           </div>
 
           <dl className="pay-breakdown">
-            <div className="pay-row"><dt>{t.regularEarnings}<small>{regularHours} hrs × {formatCurrency(hourlyRate)}/hr</small></dt><dd>{formatCurrency(payResult.regularPay)}</dd></div>
-            <div className="pay-row"><dt>{t.overtimeEarnings}<small>{overtimeHours} hrs × {overtimeMultiplier}×</small></dt><dd>{formatCurrency(payResult.overtimePay)}</dd></div>
+            <div className="pay-row"><dt>{t.regularEarnings}<small>{normalizedPayInput.regularHours} hrs × {formatCurrency(normalizedPayInput.hourlyRate)}/hr</small></dt><dd>{formatCurrency(payResult.regularPay)}</dd></div>
+            <div className="pay-row"><dt>{t.overtimeEarnings}<small>{normalizedPayInput.overtimeHours} hrs × {normalizedPayInput.overtimeMultiplier}×</small></dt><dd>{formatCurrency(payResult.overtimePay)}</dd></div>
             <div className="pay-row"><dt>{t.grossPay}<small>{t.beforeDeductions}</small></dt><dd>{formatCurrency(payResult.grossPay)}</dd></div>
             <div className="pay-row deduction-row"><dt>{t.totalDeductions}<small>{deductions.length} {t.approvedItems}</small></dt><dd>−{formatCurrency(payResult.totalDeductions)}</dd></div>
           </dl>
