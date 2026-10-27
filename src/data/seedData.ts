@@ -146,7 +146,7 @@ export const SEED_REPORTS: GrievanceReport[] = [
       {
         timestamp: '2026-10-26 14:30',
         status: 'submitted',
-        note: 'Report logged securely via SafeVoice anonymous mode.',
+        note: 'Sample report submitted in the local SafeVoice demo.',
         updatedBy: 'Worker System',
       },
       {
@@ -241,7 +241,7 @@ export const SEED_REPORTS: GrievanceReport[] = [
       {
         timestamp: '2026-10-26 11:15',
         status: 'submitted',
-        note: 'Hazard logged anonymously for campus facility audit.',
+        note: 'Sample hazard report for the campus facility demo.',
         updatedBy: 'Worker System',
       },
     ],

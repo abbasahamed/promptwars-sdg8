@@ -18,6 +18,7 @@ dist-ssr/
 Thumbs.db
 
 /SKILLS/
+opencode.jsonc
 
 # Logs
 npm-debug.log*

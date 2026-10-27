@@ -1,14 +1,17 @@
 import type { PayCalculationInput, PayCalculationResult, FormulaStep } from '../types'
+import { formatCurrency } from './formatCurrency'
 
 /**
  * Calculates fair pay with explicit mathematical steps and zero hidden deductions.
  * Protects against negative inputs and invalid rates.
  */
 export function calculatePay(input: PayCalculationInput): PayCalculationResult {
-  const hourlyRate = Math.max(0, Number(input.hourlyRate) || 0)
-  const regularHours = Math.max(0, Number(input.regularHours) || 0)
-  const overtimeHours = Math.max(0, Number(input.overtimeHours) || 0)
-  const overtimeMultiplier = Math.max(1, Number(input.overtimeMultiplier) || 1.5)
+  const finiteNonNegative = (value: number, max = Number.MAX_SAFE_INTEGER) =>
+    Number.isFinite(Number(value)) ? Math.min(max, Math.max(0, Number(value))) : 0
+  const hourlyRate = finiteNonNegative(input.hourlyRate, 1_000_000)
+  const regularHours = finiteNonNegative(input.regularHours, 80)
+  const overtimeHours = finiteNonNegative(input.overtimeHours, 50)
+  const overtimeMultiplier = Math.min(3, Math.max(1, finiteNonNegative(input.overtimeMultiplier, 3) || 1.5))
 
   // Step 1: Regular Pay
   const regularPay = Math.round(regularHours * hourlyRate * 100) / 100
@@ -21,8 +24,9 @@ export function calculatePay(input: PayCalculationInput): PayCalculationResult {
 
   // Step 4: Deductions (validate amounts)
   const deductionsList = Array.isArray(input.deductions) ? input.deductions : []
+  const normalizedDeductions = deductionsList.map((item) => ({ ...item, amount: finiteNonNegative(item.amount, 1_000_000_000) }))
   const totalDeductions = Math.round(
-    deductionsList.reduce((sum, item) => sum + Math.max(0, Number(item.amount) || 0), 0) * 100
+    normalizedDeductions.reduce((sum, item) => sum + item.amount, 0) * 100
   ) / 100
 
   // Step 5: Net Take-Home (clamped at 0 to prevent negative net pay anomalies)
@@ -32,34 +36,34 @@ export function calculatePay(input: PayCalculationInput): PayCalculationResult {
     {
       step: 'Regular Pay',
       formula: 'Regular Hours × Base Hourly Rate',
-      calculation: `${regularHours} hrs × ₹${hourlyRate.toFixed(2)}/hr`,
+      calculation: `${regularHours} hrs × ${formatCurrency(hourlyRate)}/hr`,
       result: regularPay,
     },
     {
       step: 'Overtime Pay',
       formula: 'Overtime Hours × Base Rate × Overtime Multiplier',
-      calculation: `${overtimeHours} hrs × ₹${hourlyRate.toFixed(2)}/hr × ${overtimeMultiplier}x`,
+      calculation: `${overtimeHours} hrs × ${formatCurrency(hourlyRate)}/hr × ${overtimeMultiplier}x`,
       result: overtimePay,
     },
     {
       step: 'Gross Earnings',
       formula: 'Regular Pay + Overtime Pay',
-      calculation: `₹${regularPay.toFixed(2)} + ₹${overtimePay.toFixed(2)}`,
+      calculation: `${formatCurrency(regularPay)} + ${formatCurrency(overtimePay)}`,
       result: grossPay,
     },
     {
       step: 'Total Deductions',
       formula: 'Sum of Itemized Approved Deductions',
       calculation:
-        deductionsList.length > 0
-          ? deductionsList.map((d) => `${d.label}: ₹${Number(d.amount).toFixed(2)}`).join(' + ')
-          : '₹0.00 (No deductions applied)',
+        normalizedDeductions.length > 0
+          ? normalizedDeductions.map((d) => `${d.label}: ${formatCurrency(d.amount)}`).join(' + ')
+          : `${formatCurrency(0)} (No deductions applied)`,
       result: totalDeductions,
     },
     {
       step: 'Net Take-Home Pay',
       formula: 'Gross Earnings - Total Deductions',
-      calculation: `₹${grossPay.toFixed(2)} - ₹${totalDeductions.toFixed(2)}`,
+      calculation: `${formatCurrency(grossPay)} - ${formatCurrency(totalDeductions)}`,
       result: netPay,
     },
   ]

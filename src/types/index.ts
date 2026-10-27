@@ -1,6 +1,5 @@
 export type Industry = 'construction' | 'campus'
 export type Role = 'worker' | 'employer'
-export type Language = 'en' | 'ta'
 
 export interface DeductionItem {
   id: string

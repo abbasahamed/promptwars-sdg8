@@ -1,10 +1,27 @@
 import type { WorkerProfile, GrievanceReport, Industry, ReportStatus, ReportStatusUpdate } from '../types'
 import { SEED_WORKERS, SEED_REPORTS } from '../data/seedData'
 
+let memoryWorkers: WorkerProfile[] | null = null
+let memoryReports: GrievanceReport[] | null = null
+
 const STORAGE_KEYS = {
   WORKERS: 'fairshift_workers_v1',
   REPORTS: 'fairshift_reports_v1',
   INITIALIZED: 'fairshift_initialized_v1',
+}
+
+function cloneWorkers(): typeof SEED_WORKERS {
+  return SEED_WORKERS.map((worker) => ({
+    ...worker,
+    deductions: worker.deductions.map((deduction) => ({ ...deduction })),
+  }))
+}
+
+function cloneReports(): typeof SEED_REPORTS {
+  return SEED_REPORTS.map((report) => ({
+    ...report,
+    history: report.history.map((entry) => ({ ...entry })),
+  }))
 }
 
 /**
@@ -31,6 +48,8 @@ export function resetToDefaultSeed(): void {
     localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true')
   } catch (err) {
     console.error('Failed to reset storage:', err)
+    memoryWorkers = cloneWorkers()
+    memoryReports = cloneReports()
   }
 }
 
@@ -40,10 +59,11 @@ export function resetToDefaultSeed(): void {
 export function getWorkers(industry?: Industry): WorkerProfile[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.WORKERS)
-    const list: WorkerProfile[] = raw ? JSON.parse(raw) : SEED_WORKERS
+    const list: WorkerProfile[] = raw ? JSON.parse(raw) : cloneWorkers()
     return industry ? list.filter((w) => w.industry === industry) : list
   } catch {
-    return industry ? SEED_WORKERS.filter((w) => w.industry === industry) : SEED_WORKERS
+    const list = memoryWorkers ?? cloneWorkers()
+    return industry ? list.filter((w) => w.industry === industry) : list.map((worker) => ({ ...worker, deductions: worker.deductions.map((item) => ({ ...item })) }))
   }
 }
 
@@ -62,6 +82,11 @@ export function saveWorker(updatedWorker: WorkerProfile): void {
     localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify(all))
   } catch (err) {
     console.error('Failed to save worker:', err)
+    const all = memoryWorkers ?? cloneWorkers()
+    const index = all.findIndex((worker) => worker.id === updatedWorker.id)
+    if (index >= 0) all[index] = updatedWorker
+    else all.push(updatedWorker)
+    memoryWorkers = all
   }
 }
 
@@ -72,18 +97,17 @@ export function saveWorker(updatedWorker: WorkerProfile): void {
 export function getReportsForWorker(industry?: Industry, workerName?: string): GrievanceReport[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.REPORTS)
-    const list: GrievanceReport[] = raw ? JSON.parse(raw) : SEED_REPORTS
-    let filtered = industry ? list.filter((r) => r.industry === industry) : list
-
-    if (workerName && workerName.trim().length > 0) {
-      const trimmed = workerName.trim().toLowerCase()
-      // Return reports filed by this worker or marked with this workerName
-      filtered = filtered.filter((r) => r.reporterName?.toLowerCase() === trimmed)
-    }
+    const list: GrievanceReport[] = raw ? JSON.parse(raw) : cloneReports()
+    const trimmed = workerName?.trim().toLowerCase()
+    const filtered = list.filter((r) => {
+      if (industry && r.industry !== industry) return false
+      const sample = r.id.startsWith('rep-con-') || r.id.startsWith('rep-cmp-')
+      return sample || (!r.isAnonymous && Boolean(trimmed) && r.reporterName?.trim().toLowerCase() === trimmed)
+    })
 
     return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch {
-    return SEED_REPORTS
+    return (memoryReports ?? cloneReports()).filter((r) => (!industry || r.industry === industry) && (r.id.startsWith('rep-con-') || r.id.startsWith('rep-cmp-')) && (!workerName?.trim() || !r.isAnonymous && r.reporterName?.trim().toLowerCase() === workerName.trim().toLowerCase()))
   }
 }
 
@@ -96,7 +120,7 @@ export function getReportsForWorker(industry?: Industry, workerName?: string): G
 export function getReportsForEmployer(industry?: Industry): GrievanceReport[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.REPORTS)
-    const list: GrievanceReport[] = raw ? JSON.parse(raw) : SEED_REPORTS
+    const list: GrievanceReport[] = raw ? JSON.parse(raw) : cloneReports()
     const filtered = industry ? list.filter((r) => r.industry === industry) : list
 
     // Sanitize anonymous identity
@@ -113,7 +137,7 @@ export function getReportsForEmployer(industry?: Industry): GrievanceReport[] {
 
     return sanitized.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch {
-    return SEED_REPORTS.map((r) => (r.isAnonymous ? { ...r, reporterName: '[Protected - Anonymous Report]' } : r))
+    return (memoryReports ?? cloneReports()).filter((report) => !industry || report.industry === industry).map((r) => (r.isAnonymous ? { ...r, reporterName: '[Protected - Anonymous Report]', reporterRole: undefined } : { ...r }))
   }
 }
 
@@ -147,11 +171,12 @@ export function submitReport(
 
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.REPORTS)
-    const list: GrievanceReport[] = raw ? JSON.parse(raw) : SEED_REPORTS
+    const list: GrievanceReport[] = raw ? JSON.parse(raw) : cloneReports()
     list.unshift(newReport)
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(list))
   } catch (err) {
     console.error('Failed to persist report:', err)
+    memoryReports = [newReport, ...(memoryReports ?? cloneReports())]
   }
 
   return newReport
@@ -168,7 +193,7 @@ export function updateReportStatus(
 ): GrievanceReport | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.REPORTS)
-    const list: GrievanceReport[] = raw ? JSON.parse(raw) : SEED_REPORTS
+    const list: GrievanceReport[] = raw ? JSON.parse(raw) : cloneReports()
     const item = list.find((r) => r.id === reportId)
 
     if (!item) return null
@@ -189,6 +214,12 @@ export function updateReportStatus(
     return item
   } catch (err) {
     console.error('Failed to update report status:', err)
-    return null
+    const list = memoryReports ?? cloneReports()
+    const item = list.find((report) => report.id === reportId)
+    if (!item) return null
+    item.status = newStatus
+    item.history.push({ timestamp: new Date().toISOString(), status: newStatus, note: note.trim() || `Status updated to ${newStatus}`, updatedBy: updatedBy || 'Operations Lead' })
+    memoryReports = list
+    return item
   }
 }

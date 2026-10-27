@@ -25,8 +25,8 @@ In labor-intensive industries like civil construction and higher-education campu
 
 ## 💡 Solution Overview
 
-FairShift provides dual, synchronized interfaces powered by an accessible, bilingual (English & தமிழ்) client:
-- **Worker Mode:** Provides instant, itemized wage breakdowns with zero hidden deductions and an anonymous **SafeVoice** reporting channel with verified reference tracking.
+FairShift provides worker and employer demo interfaces in English:
+- **Worker Mode:** Provides itemized wage breakdowns and a local **SafeVoice** reporting demo with reference tracking. Reports are stored in browser localStorage and this prototype does not provide secure anonymity.
 - **Employer / Admin Mode:** Delivers operational compliance oversight, automated excessive-hours fatigue alerts, and an auditable grievance triage workflow.
 - **Cross-Industry Context:** Demonstrates immediate operational adaptation across **Construction Sites** (scaffolders, crane riggers, rebar crews) and **Campus Facilities** (hostel housekeeping, electrical techs, dining sanitation teams).
 
@@ -44,12 +44,12 @@ FairShift provides dual, synchronized interfaces powered by an accessible, bilin
 - **Multi-Category Escalation:** File tickets for *Safety Hazards*, *Wage Delays*, *Working Conditions / Heat Stress*, or *Harassment*.
 - **Privacy Architecture:** Toggle *"Submit without attaching my name"* to sanitize the worker's name and role from the ordinary employer triage feed, ensuring whistleblower safety.
 - **Real-Time Ticket Tracking:** Generates verifiable reference codes (e.g. `FS-CON-8492` or `FS-CMP-3101`) with live status chips (`Submitted` ➔ `Under Review` ➔ `Action Taken` ➔ `Resolved`).
-- **Live Audit Trail:** Workers see timestamped corrective action notes posted by managers directly on their personal tracking feed.
+- **Report Status History:** The demo shows status history for sample reports and reports submitted in the current browser session.
 
 ### Feature C — Employer Insights & Fatigue Monitoring
-- **Real-Time KPI Command:** Track total active workforce, aggregate weekly overtime hours, pending grievances, and flagged fatigue violations.
+- **Workforce KPI Summary:** Track total active workforce, aggregate weekly overtime hours, pending grievances, and flagged fatigue violations.
 - **Automated Fatigue Warnings (UN SDG 8.8):** A configurable threshold engine (default: 48h/week) that flags personnel exceeding safe shift limits, categorizing alerts into *Warning* or *Critical Fatigue* with concrete mitigation instructions (e.g., mandatory 24h rest before operating high-altitude equipment or rotating night sanitation shifts).
-- **Incident Triage Center:** Filter by category and status, inspect full ticket summaries (with anonymous privacy protection), update operational status, and record verified corrective actions.
+- **Incident Triage Center:** Filter by category and status, inspect ticket summaries, update operational status, and record verified corrective actions.
 
 ---
 
@@ -57,7 +57,7 @@ FairShift provides dual, synchronized interfaces powered by an accessible, bilin
 
 | Industry Context | Target Frontline Workforce | Key Operational Vulnerabilities | FairShift Real-World Deployment |
 | :--- | :--- | :--- | :--- |
-| **🏗️ Construction Sites** | Scaffolding leads, concrete masons, crane riggers, site electricians | High-altitude falls, night pour overtime omissions, hydration depletion in extreme heat | **On-site QR Kiosks & Audio/Tamil Terminals:** Migrant workers verify daily wages before shift departure and anonymously report equipment defects with zero paper trail. |
+| **🏗️ Construction Sites** | Scaffolding leads, concrete masons, crane riggers, site electricians | High-altitude falls, night pour overtime omissions, hydration depletion in extreme heat | **On-site QR kiosks:** Workers review sample wages and submit concerns through the local demo. |
 | **🎓 Campus Facilities** | Hostel housekeeping, HVAC/electrical techs, dining sanitation staff | Exposed corridor wiring, solvent fumes in chemical depots, delayed weekend event pay | **Institutional Administrative Oversight:** Facility deans cross-audit contractor muster rolls against logged SafeVoice disputes to ensure fair wage compliance. |
 
 ---
@@ -167,7 +167,7 @@ gcloud run deploy fairshift-sdg8 \
 ## 🔒 Prototype Limitations & Security Disclosures
 
 1. **Demonstration Storage:** This prototype uses client-side `localStorage` for self-contained hackathon evaluation. In an enterprise production deployment, this would connect to an authenticated, encrypted PostgreSQL / Cloud SQL backend with row-level security (RLS).
-2. **Anonymous Reporting:** The prototype's privacy filter sanitizes identity from ordinary UI state. Production anonymous reporting would employ end-to-end cryptographic key pairs, metadata stripping, and onion routing.
+2. **SafeVoice Reporting:** Reports are stored in browser localStorage. The demo omits the reporter name when requested, but localStorage is not secure or production-grade anonymity. Do not submit sensitive information.
 3. **Statutory Payroll:** Rates and multipliers are illustrative and configurable. Production payroll must interface with regional statutory PF, ESI, and tax deduction calculators.
 
 ---
@@ -179,6 +179,6 @@ gcloud run deploy fairshift-sdg8 \
 - [x] **Repository Size:** Under 10 MB (actual: ~350 KB)
 - [x] **Zero Secrets / Bloat:** `.env`, `node_modules`, `dist` excluded via `.gitignore`
 - [x] **Three Core Working Features:** Transparent Pay, SafeVoice, Employer Dashboard
-- [x] **Bilingual Support:** English + தமிழ் (Tamil)
+- [x] **English Interface:** English-only demo UI
 - [x] **Automated Tests:** 4/4 passing unit test suite
 - [x] **Cloud Run Deployment Pipeline:** `Dockerfile`, `nginx.conf.template`, `deploy-cloudrun.sh`
